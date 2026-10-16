@@ -34,14 +34,14 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
-      envVars:
-        - key: NODE_VERSION
-          value: 22
-        - key: VITE_API_URL
-          fromService:
-            type: web
-            name: talentforge-backend
-            property: host
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: talentforge-backend
+          property: host
 
 databases:
   # 3. Managed PostgreSQL Database
