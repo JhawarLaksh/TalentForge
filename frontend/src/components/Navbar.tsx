@@ -1,0 +1,224 @@
+import React, { useState } from 'react';
+import { useApp } from '../context/AppContext';
+import type { ViewType } from '../types';
+import {
+  Compass,
+  LayoutDashboard,
+  Mountain,
+  Sliders,
+  Building2,
+  CalendarDays,
+  GraduationCap,
+  Flame,
+  Sun,
+  Moon,
+  Menu,
+  X,
+  Anvil
+} from 'lucide-react';
+
+export const Navbar: React.FC = () => {
+  const {
+    activeView,
+    setActiveView,
+    profile,
+    readinessScore,
+    currentAltitudeMeters,
+    currentCamp,
+    theme,
+    toggleTheme,
+    isApiConnected,
+  } = useApp();
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const navItems: { id: ViewType; label: string; icon: React.ReactNode }[] = [
+    { id: 'landing', label: 'Ascent Map', icon: <Compass className="w-3.5 h-3.5" /> },
+    { id: 'dashboard', label: 'Command Deck', icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
+    { id: 'profile', label: 'Expedition Goal', icon: <Mountain className="w-3.5 h-3.5" /> },
+    { id: 'skills', label: 'Altitude Radar', icon: <Sliders className="w-3.5 h-3.5" /> },
+    { id: 'companies', label: 'Summit Scouting', icon: <Building2 className="w-3.5 h-3.5" /> },
+    { id: 'planner', label: 'Ascent Planner', icon: <CalendarDays className="w-3.5 h-3.5" /> },
+    { id: 'interview-prep', label: 'Apex Vault', icon: <GraduationCap className="w-3.5 h-3.5" /> },
+  ];
+
+  const handleNavClick = (viewId: ViewType) => {
+    setActiveView(viewId);
+    setMobileMenuOpen(false);
+  };
+
+  const isDark = theme === 'forge-dark' || theme === 'summit-dark';
+
+  return (
+    <header className="sticky top-0 z-50 glass-panel border-b border-white/[0.08] transition-colors duration-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          
+          {/* Logo / Brand */}
+          <div
+            onClick={() => handleNavClick('landing')}
+            className="flex items-center gap-3 cursor-pointer select-none group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 flex items-center justify-center text-white shadow-md glow-amber group-hover:scale-105 transition-transform">
+              <Anvil className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold text-xl tracking-tight text-white glacier-theme:text-slate-900">
+                  Talent<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400 font-black">Forge</span>
+                </span>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  8,848m
+                </span>
+              </div>
+              <p className="text-[10px] text-slate-400 font-medium hidden sm:block">
+                Career Forging & Placement Engine
+              </p>
+            </div>
+          </div>
+
+          {/* Desktop Navigation Links */}
+          <nav className="hidden xl:flex items-center gap-1 p-1.5 rounded-2xl bg-white/[0.03] glacier-theme:bg-slate-100 border border-white/[0.06] glacier-theme:border-slate-200">
+            {navItems.map(item => {
+              const isActive = activeView === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavClick(item.id)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-gradient-to-r from-amber-500/25 via-orange-500/20 to-rose-500/15 text-white glacier-theme:bg-amber-50 glacier-theme:text-amber-800 border border-amber-400/40 shadow-xs'
+                      : 'text-slate-400 hover:text-white glacier-theme:hover:text-slate-900 hover:bg-white/[0.04]'
+                  }`}
+                >
+                  <span className={isActive ? 'text-amber-400' : 'text-slate-500'}>
+                    {item.icon}
+                  </span>
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Live Summit Telemetry & Controls */}
+          <div className="hidden md:flex items-center gap-3">
+            
+            {/* Live Altitude Meter Pill */}
+            <div
+              title="Current Placement Elevation"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 glacier-theme:bg-slate-100 border border-white/[0.08] glacier-theme:border-slate-200 text-xs"
+            >
+              <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></div>
+              <span className="font-mono font-bold text-amber-300 glacier-theme:text-amber-800">
+                {currentAltitudeMeters.toLocaleString()}m
+              </span>
+              <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold border-l border-slate-700 glacier-theme:border-slate-300 pl-1.5">
+                {currentCamp.split(' ')[0]}
+              </span>
+            </div>
+
+            {/* Streak Pill */}
+            <div
+              title="Consecutive Days Ascent Streak"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-300 glacier-theme:text-orange-800 text-xs font-bold"
+            >
+              <Flame className="w-4 h-4 text-orange-400 fill-orange-400 animate-pulse" />
+              <span>{profile.currentStreakDays}d streak</span>
+            </div>
+
+            {/* DB Status Pill */}
+            <div
+              title={isApiConnected ? 'Connected to Backend Database (Live Sync)' : 'Offline Mode (Local Mock State)'}
+              className={`hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-colors ${
+                isApiConnected
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                  : 'bg-slate-500/10 border-slate-500/30 text-slate-400'
+              }`}
+            >
+              <span className={`w-2 h-2 rounded-full ${isApiConnected ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'}`} />
+              <span>{isApiConnected ? 'DB Live' : 'Local'}</span>
+            </div>
+
+            {/* Theme Switcher Toggle */}
+            <button
+              onClick={toggleTheme}
+              title={isDark ? 'Switch to Forge Light' : 'Switch to Forge Dark'}
+              className="p-2 rounded-xl bg-white/[0.05] glacier-theme:bg-slate-100 border border-white/[0.08] glacier-theme:border-slate-200 text-slate-300 glacier-theme:text-slate-700 hover:text-white transition-colors cursor-pointer"
+            >
+              {isDark ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-orange-600" />}
+            </button>
+
+            {/* User Profile Pill */}
+            <button
+              onClick={() => handleNavClick('profile')}
+              className="flex items-center gap-2 pl-2 pr-3 py-1 rounded-full bg-gradient-to-r from-amber-500/10 to-transparent border border-amber-500/30 hover:border-amber-400 transition-all cursor-pointer"
+            >
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+                {profile.fullName.charAt(0)}
+              </div>
+              <div className="text-left">
+                <p className="text-xs font-bold text-white glacier-theme:text-slate-900 leading-none">
+                  {profile.fullName.split(' ')[0]}
+                </p>
+                <p className="text-[10px] text-amber-400 font-semibold">
+                  {readinessScore}% Summit
+                </p>
+              </div>
+            </button>
+
+          </div>
+
+          {/* Mobile Menu & Theme Switcher Button */}
+          <div className="flex items-center gap-2 xl:hidden">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-xl bg-white/[0.05] text-slate-300 cursor-pointer"
+            >
+              {isDark ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-orange-600" />}
+            </button>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-xl bg-white/[0.05] text-slate-300 hover:text-white cursor-pointer"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      {/* Mobile Menu Drawer */}
+      {mobileMenuOpen && (
+        <div className="xl:hidden glass-panel border-t border-white/[0.08] px-4 pt-3 pb-5 space-y-2">
+          <div className="flex items-center justify-between pb-3 mb-2 border-b border-white/[0.06] text-xs">
+            <span className="font-semibold text-slate-300">
+              Target: {profile.targetPackage}
+            </span>
+            <span className="font-mono text-amber-400 font-bold">
+              Altitude: {currentAltitudeMeters}m ({readinessScore}%)
+            </span>
+          </div>
+          {navItems.map(item => {
+            const isActive = activeView === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item.id)}
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                  isActive
+                    ? 'bg-amber-600/30 text-white border border-amber-500/40'
+                    : 'text-slate-300 hover:bg-white/[0.05]'
+                }`}
+              >
+                <span className={isActive ? 'text-amber-400' : 'text-slate-500'}>
+                  {item.icon}
+                </span>
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </header>
+  );
+};
